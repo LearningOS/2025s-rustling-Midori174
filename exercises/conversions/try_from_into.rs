@@ -27,7 +27,18 @@ enum IntoColorError {
     IntConversion,
 }
 
-// I AM NOT DONE
+// The `TryFrom` trait is used to define a conversion that can fail. It is
+// similar to the `From` trait, but it returns a `Result` instead of the target
+// type. The `TryFrom` trait is used for fallible conversions, where the
+// conversion may fail due to invalid input or other reasons.
+// The `TryFrom` trait is defined in the `std::convert` module and is used to
+// convert between different types in a way that can fail. It is often used in  
+// conjunction with the `TryInto` trait, which is used to convert from one type
+// to another in a way that can fail. The `TryFrom` trait is useful when you
+// want to define a conversion that may fail, such as converting a string to an
+// integer or converting a string to a date. It allows you to handle errors in a
+// more controlled way, rather than panicking or returning a default value.
+
 
 // Your task is to complete this implementation and return an Ok result of inner
 // type Color. You need to create an implementation for a tuple of three
@@ -41,6 +52,16 @@ enum IntoColorError {
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let (red, green, blue) = tuple;
+        // 检查每个值是否在 0-255 范围内
+        if red < 0 || red > 255 || green < 0 || green > 255 || blue < 0 || blue > 255 {
+            return Err(IntoColorError::IntConversion);
+        }
+        Ok(Color {
+            red: red as u8,
+            green: green as u8,
+            blue: blue as u8,
+        })
     }
 }
 
@@ -48,6 +69,13 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        // 使用 TryFrom 将数组转换为 Color
+        let color: Color = (arr[0], arr[1], arr[2]).try_into()?;
+        // 检查每个值是否在 0-255 范围内
+        if color.red < 0 || color.red > 255 || color.green < 0 || color.green > 255 || color.blue < 0 || color.blue > 255 {
+            return Err(IntoColorError::IntConversion);
+        }
+        Ok(color)
     }
 }
 
@@ -55,6 +83,13 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        // 检查切片长度
+        if slice.len() != 3 {
+            return Err(IntoColorError::BadLen);
+        }
+        // 使用 TryFrom 将切片转换为 Color
+        let color: Color = (slice[0], slice[1], slice[2]).try_into()?;
+        Ok(color)
     }
 }
 

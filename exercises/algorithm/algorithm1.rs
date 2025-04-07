@@ -2,7 +2,7 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -69,17 +69,58 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
-        }
-	}
-}
+	pub fn merge(mut list_a: LinkedList<T>, mut list_b: LinkedList<T>) -> Self 
+where
+    T: PartialOrd + Clone,
+{
+    let mut merged_list = LinkedList::new();
+    
+    let mut node_a = list_a.start;
+    let mut node_b = list_b.start;
 
+    // 安全地获取节点值的辅助函数
+    fn get_node_val<T>(node: Option<NonNull<Node<T>>>) -> Option<T> 
+    where
+        T: Clone,
+    {
+        node.map(|ptr| unsafe { (*ptr.as_ptr()).val.clone() })
+    }
+
+    // 安全地移动到下一个节点的辅助函数
+    fn move_next<T>(node: Option<NonNull<Node<T>>>) -> Option<NonNull<Node<T>>> {
+        node.and_then(|ptr| unsafe { (*ptr.as_ptr()).next })
+    }
+
+    while node_a.is_some() || node_b.is_some() {
+        let next_val = match (get_node_val(node_a), get_node_val(node_b)) {
+            (Some(a_val), Some(b_val)) => {
+                if a_val <= b_val {
+                    node_a = move_next(node_a);
+                    Some(a_val)
+                } else {
+                    node_b = move_next(node_b);
+                    Some(b_val)
+                }
+            }
+            (Some(a_val), None) => {
+                node_a = move_next(node_a);
+                Some(a_val)
+            }
+            (None, Some(b_val)) => {
+                node_b = move_next(node_b);
+                Some(b_val)
+            }
+            (None, None) => None,
+        };
+
+        if let Some(val) = next_val {
+            merged_list.add(val);
+        }
+    }
+
+    merged_list
+    }
+}
 impl<T> Display for LinkedList<T>
 where
     T: Display,

@@ -9,14 +9,18 @@
 // Execute `rustlings hint errors1` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
 
-pub fn generate_nametag_text(name: String) -> Option<String> {
+
+pub fn generate_nametag_text(name: String) -> Result<String, String> {
+    // This function should return a Result<String, String> instead of an
+    // Option<String>. If the name is empty, it should return an error with a
+    // message explaining that the name was empty. Otherwise, it should return
+    // the string "Hi! My name is <name>".
     if name.is_empty() {
         // Empty names aren't allowed.
-        None
+        Result::Err("`name` was empty; it must be nonempty.".into())
     } else {
-        Some(format!("Hi! My name is {}", name))
+        Result::Ok(format!("Hi! My name is {}", name))
     }
 }
 
